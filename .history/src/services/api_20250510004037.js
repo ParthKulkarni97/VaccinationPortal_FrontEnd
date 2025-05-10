@@ -118,7 +118,7 @@ export const api = {
   // Dashboard
   getDashboardMetrics: async () => {
     try {
-      const response = await apiClient.get(`/dashboard`);
+      const response = await apiClient.get(`/dashboard/metrics`);
       return response.data;
     } catch (error) {
       console.error('Error fetching dashboard metrics:', error);
