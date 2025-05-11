@@ -86,25 +86,34 @@ const Reports = () => {
   const handleDownload = async (format) => {
     try {
       setLoading(true);
-      const blobData = await api.downloadReport(format, filters);
+      const blob = await api.downloadReport(format, {
+        ...filters,
+        page,
+        size: rowsPerPage
+      });
   
-      // Determine file extension
-      const ext = format === 'excel' ? 'xlsx' : format;
+      // Get the correct file extension
+      const fileExtensions = {
+        'excel': 'xlsx',
+        'pdf': 'pdf',
+        'csv': 'csv'
+      };
+      const ext = fileExtensions[format] || format;
   
-      // Create a download link
-      const url = window.URL.createObjectURL(blobData);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `vaccination_report.${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      // Create and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `vaccination_report_${new Date().toISOString().split('T')[0]}.${ext}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
       window.URL.revokeObjectURL(url);
   
-      showSnackbar(`Report downloaded successfully as ${ext.toUpperCase()}`, 'success');
+      showSnackbar(`Report downloaded successfully as ${format.toUpperCase()}`, 'success');
     } catch (err) {
       console.error('Error downloading report:', err);
-      showSnackbar('Failed to download report', 'error');
+      showSnackbar(`Failed to download ${format.toUpperCase()} report. Please try again.`, 'error');
     } finally {
       setLoading(false);
     }
@@ -139,23 +148,24 @@ const Reports = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, mt: 2 }}>
         <Typography variant="h4">Vaccination Reports</Typography>
         <Box>
-        <Button 
-  variant="outlined" 
-  startIcon={<FileDownloadIcon />}
-  onClick={() => handleDownload('excel')}
-  disabled={loading}
-  sx={{ mr: 2 }}
->
-  Export Excel
-</Button>
-<Button 
-  variant="outlined" 
-  startIcon={<FileDownloadIcon />}
-  onClick={() => handleDownload('pdf')}
-  disabled={loading}
->
-  Export PDF
-</Button>
+          <Button 
+      variant="outlined" 
+      startIcon={<FileDownloadIcon />}
+      onClick={() => handleDownload('excel')}
+      disabled={loading}
+      sx={{ mr: 2 }}
+    >
+      {loading ? <CircularProgress size={20} /> : 'Export Excel'}
+    </Button>
+    <Button 
+      variant="outlined" 
+      startIcon={<FileDownloadIcon />}
+      onClick={() => handleDownload('pdf')}
+      disabled={loading}
+      sx={{ mr: 2 }}
+    >
+      {loading ? <CircularProgress size={20} /> : 'Export PDF'}
+    </Button>
     <Button 
       variant="outlined" 
       startIcon={<FileDownloadIcon />}

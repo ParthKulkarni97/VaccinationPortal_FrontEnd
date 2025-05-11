@@ -86,22 +86,18 @@ const Reports = () => {
   const handleDownload = async (format) => {
     try {
       setLoading(true);
-      const blobData = await api.downloadReport(format, filters);
-  
-      // Determine file extension
-      const ext = format === 'excel' ? 'xlsx' : format;
-  
+      const blob = await api.downloadReport(format, filters);
+      
       // Create a download link
-      const url = window.URL.createObjectURL(blobData);
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `vaccination_report.${ext}`;
+      a.download = `vaccination_report.${format}`;
       document.body.appendChild(a);
       a.click();
-      a.remove();
       window.URL.revokeObjectURL(url);
-  
-      showSnackbar(`Report downloaded successfully as ${ext.toUpperCase()}`, 'success');
+      
+      showSnackbar(`Report downloaded successfully as ${format.toUpperCase()}`, 'success');
     } catch (err) {
       console.error('Error downloading report:', err);
       showSnackbar('Failed to download report', 'error');
@@ -139,32 +135,22 @@ const Reports = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, mt: 2 }}>
         <Typography variant="h4">Vaccination Reports</Typography>
         <Box>
-        <Button 
-  variant="outlined" 
-  startIcon={<FileDownloadIcon />}
-  onClick={() => handleDownload('excel')}
-  disabled={loading}
-  sx={{ mr: 2 }}
->
-  Export Excel
-</Button>
-<Button 
-  variant="outlined" 
-  startIcon={<FileDownloadIcon />}
-  onClick={() => handleDownload('pdf')}
-  disabled={loading}
->
-  Export PDF
-</Button>
-    <Button 
-      variant="outlined" 
-      startIcon={<FileDownloadIcon />}
-      onClick={() => handleDownload('csv')}
-      disabled={loading}
-    >
-      {loading ? <CircularProgress size={20} /> : 'Export CSV'}
-    </Button>
-    </Box>
+          <Button 
+            variant="outlined" 
+            startIcon={<FileDownloadIcon />}
+            onClick={() => handleDownload('csv')}
+            sx={{ mr: 2 }}
+          >
+            Download CSV
+          </Button>
+          <Button 
+            variant="outlined" 
+            startIcon={<FileDownloadIcon />}
+            onClick={() => handleDownload('xlsx')}
+          >
+            Download Excel
+          </Button>
+        </Box>
       </Box>
 
       <Paper sx={{ p: 3, mb: 3 }}>

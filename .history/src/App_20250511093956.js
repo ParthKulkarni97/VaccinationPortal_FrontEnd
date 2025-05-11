@@ -9,9 +9,6 @@ import Reports from './pages/Reports';
 import Footer from './components/Footer';
 import Login from './pages/Login';
 import AddDrive from "./pages/AddDrive";
-// Import new components
-import StudentVaccination from './pages/StudentVaccination';
-import VaccinationReport from './pages/VaccinationReport';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
@@ -53,23 +50,6 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <Students />
-              </PrivateRoute>
-            }
-          />
-          {/* Add new routes for vaccination */}
-          <Route
-            path="/students/vaccination"
-            element={
-              <PrivateRoute>
-                <StudentVaccination />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/vaccination-report"
-            element={
-              <PrivateRoute>
-                <VaccinationReport />
               </PrivateRoute>
             }
           />

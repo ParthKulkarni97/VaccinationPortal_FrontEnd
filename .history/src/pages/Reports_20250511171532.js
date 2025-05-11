@@ -139,23 +139,24 @@ const Reports = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, mt: 2 }}>
         <Typography variant="h4">Vaccination Reports</Typography>
         <Box>
-        <Button 
-  variant="outlined" 
-  startIcon={<FileDownloadIcon />}
-  onClick={() => handleDownload('excel')}
-  disabled={loading}
-  sx={{ mr: 2 }}
->
-  Export Excel
-</Button>
-<Button 
-  variant="outlined" 
-  startIcon={<FileDownloadIcon />}
-  onClick={() => handleDownload('pdf')}
-  disabled={loading}
->
-  Export PDF
-</Button>
+          <Button 
+      variant="outlined" 
+      startIcon={<FileDownloadIcon />}
+      onClick={() => handleDownload('excel')}
+      disabled={loading}
+      sx={{ mr: 2 }}
+    >
+      {loading ? <CircularProgress size={20} /> : 'Export Excel'}
+    </Button>
+    <Button 
+      variant="outlined" 
+      startIcon={<FileDownloadIcon />}
+      onClick={() => handleDownload('pdf')}
+      disabled={loading}
+      sx={{ mr: 2 }}
+    >
+      {loading ? <CircularProgress size={20} /> : 'Export PDF'}
+    </Button>
     <Button 
       variant="outlined" 
       startIcon={<FileDownloadIcon />}
