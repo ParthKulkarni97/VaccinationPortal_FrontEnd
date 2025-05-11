@@ -10,11 +10,22 @@ const apiClient = axios.create({
   }
 });
 
-export const api = {
+const api = {
+  // Auth
+  login: async (credentials) => {
+    try {
+      const response = await apiClient.post('/auth/login', credentials);
+      return response.data;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  },
+
   // Students
   getStudents: async (page = 0, size = 10, searchTerm = '') => {
     try {
-      const response = await apiClient.get(`/students`, {
+      const response = await apiClient.get('/students', {
         params: { page, size, searchTerm }
       });
       return response.data;
@@ -23,17 +34,37 @@ export const api = {
       throw error;
     }
   },
-  
+
+  getStudentById: async (id) => {
+    try {
+      const response = await apiClient.get(`/students/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching student:', error);
+      throw error;
+    }
+  },
+
+  getStudentVaccinations: async (studentId) => {
+    try {
+      const response = await apiClient.get(`/students/${studentId}/vaccinations`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching student vaccinations:', error);
+      throw error;
+    }
+  },
+
   addStudent: async (student) => {
     try {
-      const response = await apiClient.post(`/students`, student);
+      const response = await apiClient.post('/students', student);
       return response.data;
     } catch (error) {
       console.error('Error adding student:', error);
       throw error;
     }
   },
-  
+
   updateStudent: async (id, student) => {
     try {
       const response = await apiClient.put(`/students/${id}`, student);
@@ -43,7 +74,7 @@ export const api = {
       throw error;
     }
   },
-  
+
   deleteStudent: async (id) => {
     try {
       const response = await apiClient.delete(`/students/${id}`);
@@ -57,44 +88,54 @@ export const api = {
   // Vaccination Drives
   getDrives: async () => {
     try {
-      const response = await apiClient.get(`/drives`);
+      const response = await apiClient.get('/drives');
       return response.data;
     } catch (error) {
       console.error('Error fetching drives:', error);
       throw error;
     }
   },
-  
+
+  getDriveById: async (id) => {
+    try {
+      const response = await apiClient.get(`/drives/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching drive:', error);
+      throw error;
+    }
+  },
+
   getUpcomingDrives: async () => {
     try {
-      const response = await apiClient.get(`/drives/upcoming`);
+      const response = await apiClient.get('/drives/upcoming');
       return response.data;
     } catch (error) {
       console.error('Error fetching upcoming drives:', error);
       throw error;
     }
   },
-  
+
   getCompletedDrives: async () => {
     try {
-      const response = await apiClient.get(`/drives/completed`);
+      const response = await apiClient.get('/drives/completed');
       return response.data;
     } catch (error) {
       console.error('Error fetching completed drives:', error);
       throw error;
     }
   },
-  
+
   addDrive: async (drive) => {
     try {
-      const response = await apiClient.post(`/drives`, drive);
+      const response = await apiClient.post('/drives', drive);
       return response.data;
     } catch (error) {
       console.error('Error adding drive:', error);
       throw error;
     }
   },
-  
+
   updateDrive: async (id, drive) => {
     try {
       const response = await apiClient.put(`/drives/${id}`, drive);
@@ -104,7 +145,7 @@ export const api = {
       throw error;
     }
   },
-  
+
   deleteDrive: async (id) => {
     try {
       const response = await apiClient.delete(`/drives/${id}`);
@@ -118,56 +159,69 @@ export const api = {
   // Dashboard
   getDashboardMetrics: async () => {
     try {
-      const response = await apiClient.get(`/dashboard`);
+      const response = await apiClient.get('/dashboard');
       return response.data;
     } catch (error) {
       console.error('Error fetching dashboard metrics:', error);
       throw error;
     }
   },
-  
+
   // Student Vaccination
-  updateStudentVaccination: async (studentId, driveId) => {
+  vaccinateStudent: async (studentId, record) => {
     try {
-      const response = await apiClient.post(`/students/${studentId}/vaccinate`, { driveId });
+      const response = await apiClient.post(`/students/${studentId}/vaccinate`, record);
       return response.data;
     } catch (error) {
       console.error('Error updating student vaccination:', error);
       throw error;
     }
   },
-  
+
   // Reports
-  generateVaccinationReport: async (filters) => {
+  generateVaccinationReport: async (filters = {}) => {
     try {
-      const response = await apiClient.get(`/reports/vaccination`, { params: filters });
+      const response = await apiClient.get('/reports/vaccination', { 
+        params: filters 
+      });
       return response.data;
     } catch (error) {
       console.error('Error generating vaccination report:', error);
       throw error;
     }
   },
-  
-  downloadReport: async (format, filters) => {
+
+  downloadReport: async (format, filters = {}) => {
     try {
-      const response = await apiClient.get(`/reports/download`, {
+      const response = await apiClient.get('/reports/download', {
         params: { ...filters, format },
         responseType: 'blob'
       });
+      
+      // Create a download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `vaccination_report.${format.toLowerCase()}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
       return response.data;
     } catch (error) {
       console.error('Error downloading report:', error);
       throw error;
     }
   },
-  
+
   // CSV Upload
   uploadStudentsCsv: async (file) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      
-      const response = await apiClient.post(`/students/upload`, formData, {
+
+      const response = await apiClient.post('/students/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -177,7 +231,16 @@ export const api = {
       console.error('Error uploading students CSV:', error);
       throw error;
     }
+  },
+
+  // Utility function to set auth token
+  setAuthToken: (token) => {
+    if (token) {
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete apiClient.defaults.headers.common['Authorization'];
+    }
   }
 };
 
-export default api;
+export { api, apiClient };
